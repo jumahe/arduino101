@@ -1,42 +1,41 @@
-// -- variables
-int led_pin = 11;   // -- pin alimentant la LED
-int pause = 500;    // -- pause entre chaque changement d'état
-int iterations = 5; // -- nombre d'itérations
+// -- variable
+long last_request_time = 0;
 
 // -- exécuté une seule fois
 void setup()
 {
   Serial.begin(9600);
-
-  // -- init led pin
-  pinMode(led_pin, OUTPUT);
-  digitalWrite(led_pin, LOW);
-  
   while(!Serial);
-  Serial.println("Setup complete. Type <n> to make it blink.");
+  Serial.println("Setup complete. Type <N> to get the time elapsed since the start of this script.");
 }
 
-// -- boucle
+// -- en boucle
 void loop()
 {
+  // -- si le Serial buffer n'est pas vide
   while(Serial.available())
   {
-    if( Serial.read() == 'n' )
+    char c = Serial.read(); // -- lecture du premier octet disponible
+    
+    if( c == 'n' || c == 'N' )
     {
-      blinkit();
+      long timestamp = millis();
+      Serial.println( "Temps écoulé depuis le début: " + readableTime(timestamp) );
+
+      if( last_request_time != 0 ) Serial.println( "Temps écoulé depuis la dernière requête: " + readableTime(timestamp - last_request_time) );
+      last_request_time = timestamp;
     }
   }
 }
 
-// -- blink it
-void blinkit()
+// -- format de temps lisible
+String readableTime(long ms)
 {
-  for(int i = 0; i < iterations; i++)
-  {
-    digitalWrite(led_pin, HIGH);
-    delay(pause);
-    digitalWrite(led_pin, LOW);
-    delay(pause);
-  }
+  int s = ms / 1000;
+  ms = ms % 1000;
+  int mn = s / 60;
+  s = s % 60;
+
+  return String(mn) + ":" + String(s) + ":" + String(ms);
 }
 

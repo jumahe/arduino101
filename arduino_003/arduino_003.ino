@@ -1,41 +1,35 @@
 // -- variable
-long last_request_time = 0;
+String myBuffer = "";
 
 // -- exécuté une seule fois
 void setup()
 {
   Serial.begin(9600);
   while(!Serial);
-  Serial.println("Setup complete. Type <N> to get the time elapsed since the start of this script.");
+  Serial.println("Setup complete. Type your String, then click SEND.");
 }
 
 // -- en boucle
 void loop()
 {
+  // -- RAZ à chaque boucle loop
+  myBuffer = "";
+  
   // -- si le Serial buffer n'est pas vide
+  // -- lire son contenu lettre à lettre (while)
   while(Serial.available())
   {
     char c = Serial.read(); // -- lecture du premier octet disponible
-    
-    if( c == 'n' || c == 'N' )
-    {
-      long timestamp = millis();
-      Serial.println( "Temps écoulé depuis le début: " + readableTime(timestamp) );
-
-      if( last_request_time != 0 ) Serial.println( "Temps écoulé depuis la dernière requête: " + readableTime(timestamp - last_request_time) );
-      last_request_time = timestamp;
-    }
+    myBuffer = myBuffer + String(c); // -- concaténation dans le buffer
   }
-}
 
-// -- format de temps lisible
-String readableTime(long ms)
-{
-  int s = ms / 1000;
-  ms = ms % 1000;
-  int mn = s / 60;
-  s = s % 60;
+  // -- s'il n'est pas vide, le renvoyer après modification
+  if(myBuffer != "")
+  {
+    myBuffer.toUpperCase();
+    Serial.println("myBuffer: " + myBuffer + ".");
+  }
 
-  return String(mn) + ":" + String(s) + ":" + String(ms);
+  delay(500); // -- petit délais
 }
 
